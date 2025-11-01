@@ -1,81 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
-// Dealer avatar library - using emoji combinations for now
-// In production, you could use actual images or AI-generated avatars
+// Dealer avatar library
 const DEALERS = [
   {
     id: 1,
-    name: "Sophia",
-    avatar: "👩‍💼",
+    name: "Yami",
+    image: "/yami.jpg",
     greeting: "Welcome to the table! Good luck!",
     color: "from-pink-500 to-rose-500",
-  },
-  {
-    id: 2,
-    name: "Emma",
-    avatar: "👩‍🦰",
-    greeting: "Let's play some poker!",
-    color: "from-purple-500 to-indigo-500",
-  },
-  {
-    id: 3,
-    name: "Olivia",
-    avatar: "👱‍♀️",
-    greeting: "May the best hand win!",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    id: 4,
-    name: "Ava",
-    avatar: "👩‍🦱",
-    greeting: "Place your bets!",
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    id: 5,
-    name: "Isabella",
-    avatar: "👩",
-    greeting: "Good luck at the table!",
-    color: "from-yellow-500 to-orange-500",
-  },
-  {
-    id: 6,
-    name: "Mia",
-    avatar: "👩‍🎤",
-    greeting: "Let's deal some cards!",
-    color: "from-red-500 to-pink-500",
   },
 ];
 
 interface DealerAvatarProps {
   gameId?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   showGreeting?: boolean;
 }
 
-export function DealerAvatar({ gameId, size = "md", showGreeting = true }: DealerAvatarProps) {
-  const [dealer, setDealer] = useState(DEALERS[0]);
+export function DealerAvatar({ size = "md", showGreeting = true }: DealerAvatarProps) {
+  const [dealer] = useState(DEALERS[0]); // Always use Yami
   const [showMessage, setShowMessage] = useState(false);
 
   useEffect(() => {
-    // Select dealer based on gameId (deterministic) or random
-    const index = gameId ? parseInt(gameId) % DEALERS.length : Math.floor(Math.random() * DEALERS.length);
-    setDealer(DEALERS[index]);
-
     // Show greeting message
     if (showGreeting) {
       setShowMessage(true);
       const timer = setTimeout(() => setShowMessage(false), 5000);
       return () => clearTimeout(timer);
     }
-  }, [gameId, showGreeting]);
+  }, [showGreeting]);
 
   const sizeClasses = {
-    sm: "w-16 h-16 text-3xl",
-    md: "w-24 h-24 text-5xl",
-    lg: "w-32 h-32 text-7xl",
+    sm: "w-16 h-16",
+    md: "w-24 h-24",
+    lg: "w-40 h-40",
+    xl: "w-56 h-56",
+  };
+
+  const imageSizes = {
+    sm: 64,
+    md: 96,
+    lg: 160,
+    xl: 224,
   };
 
   return (
@@ -83,12 +52,19 @@ export function DealerAvatar({ gameId, size = "md", showGreeting = true }: Deale
       {/* Dealer Avatar */}
       <div className="relative">
         <div
-          className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${dealer.color} flex items-center justify-center shadow-lg border-4 border-white`}
+          className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${dealer.color} flex items-center justify-center shadow-lg border-4 border-white overflow-hidden`}
         >
-          <span className="filter drop-shadow-lg">{dealer.avatar}</span>
+          <Image
+            src={dealer.image}
+            alt={dealer.name}
+            width={imageSizes[size]}
+            height={imageSizes[size]}
+            className="object-cover w-full h-full"
+            priority
+          />
         </div>
         {/* Online indicator */}
-        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+        <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
       </div>
 
       {/* Dealer Name */}
@@ -110,6 +86,3 @@ export function DealerAvatar({ gameId, size = "md", showGreeting = true }: Deale
     </div>
   );
 }
-
-// Export dealer list for other components
-export { DEALERS };

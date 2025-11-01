@@ -201,9 +201,7 @@ export function GameTable({ gameId }: GameTableProps) {
   // Lazy initialization: initialize FHEVM when player is in a game
   useEffect(() => {
     // Check if player is in the game (their address is in the players list)
-    const isPlayerInGame = playerAddresses.some(
-      addr => addr.toLowerCase() === address?.toLowerCase()
-    );
+    const isPlayerInGame = playerAddresses.some(addr => addr.toLowerCase() === address?.toLowerCase());
 
     if (isPlayerInGame && !shouldInitFhevm) {
       console.log("🔐 Player is in game, initializing FHEVM...");
@@ -384,23 +382,6 @@ export function GameTable({ gameId }: GameTableProps) {
     });
   }, [communityCardsData, communityCards, phase, gameId, contractInfo?.address]);
 
-  // Debug function to manually check contract
-  const debugContract = async () => {
-    if (!contractInfo?.address) {
-      console.error("❌ No contract address");
-      return;
-    }
-
-    console.log("🔍 Manual Contract Check:");
-    console.log("  Contract Address:", contractInfo.address);
-    console.log("  Game ID:", gameId);
-    console.log("  Chain ID:", chainId);
-
-    // Force refetch
-    const result = await refetchGameInfo();
-    console.log("  Refetch Result:", result);
-  };
-
   // Render error/loading states
   if (!address) {
     return (
@@ -493,257 +474,249 @@ export function GameTable({ gameId }: GameTableProps) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="card bg-gradient-to-br from-purple-900 to-indigo-900 shadow-xl">
-            <div className="card-body items-center p-6">
-              <DealerAvatar gameId={gameId} size="md" showGreeting={true} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+      {/* Top Bar - Game Info */}
+      <div className="max-w-[1600px] mx-auto mb-4">
+        <div className="flex items-center justify-between bg-slate-800/50 backdrop-blur-sm rounded-xl px-6 py-3 border border-slate-700/50">
+          {/* Left: Game Info */}
+          <div className="flex items-center gap-6">
+            <div>
+              <h3 className="text-lg font-bold text-white">Game #{gameId}</h3>
+              <p className="text-sm text-slate-400">
+                {phaseNames[phase]} • {playerCount.toString()} Players
+              </p>
             </div>
-          </div>
-          <ActionHistory gameId={Number(gameId)} />
-        </div>
-
-        <div className="lg:col-span-3 space-y-4">
-          <div className="card bg-base-200 shadow-xl">
-            <div className="card-body">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold">Game #{gameId}</h3>
-                  <p className="text-sm opacity-70">
-                    Phase: {phaseNames[phase]} | Players: {playerCount.toString()}
-                  </p>
-                  {phase >= 1 && phase < 4 && playerAddresses.length > 0 && (
-                    <p className="text-sm opacity-70 mt-1">
-                      Current Turn:{" "}
-                      <span className="font-semibold text-accent">
-                        {playerAddresses[currentPlayerIndex]?.slice(0, 6)}...
-                        {playerAddresses[currentPlayerIndex]?.slice(-4)}
-                      </span>{" "}
-                      | Current Bet: <span className="font-semibold text-warning">{currentBet.toString()}</span>
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <button className="btn btn-sm btn-ghost" onClick={() => refetchGameInfo()} title="Refresh game data">
-                    🔄 Refresh
-                  </button>
-                  <button className="btn btn-sm btn-info" onClick={debugContract} title="Debug contract call">
-                    🐛 Debug
-                  </button>
-                  <div className="text-right">
-                    <p className="text-sm opacity-70">Pot</p>
-                    <p className="text-2xl font-bold text-primary">{pot.toString()} chips</p>
-                  </div>
-                </div>
+            {phase >= 1 && phase < 4 && playerAddresses.length > 0 && (
+              <div className="hidden md:block border-l border-slate-700 pl-6">
+                <p className="text-xs text-slate-500">Current Turn</p>
+                <p className="text-sm font-semibold text-emerald-400">
+                  {playerAddresses[currentPlayerIndex]?.slice(0, 6)}...
+                  {playerAddresses[currentPlayerIndex]?.slice(-4)}
+                </p>
               </div>
+            )}
+          </div>
+
+          {/* Right: Pot */}
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Total Pot</p>
+              <p className="text-2xl font-bold text-amber-400">{pot.toString()}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Game Area */}
+      <div className="max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_auto_1fr] gap-4">
+          {/* Left Sidebar - Action History */}
+          <div className="order-2 lg:order-1">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden">
+              <ActionHistory gameId={Number(gameId)} />
             </div>
           </div>
 
-          {/* New Poker Table View */}
-          <div className="card bg-base-200 shadow-2xl">
-            <div className="card-body p-4">
-              <PokerTable
-                players={players}
-                communityCards={communityCards}
-                pot={pot}
-                phase={phase}
-                yourCards={{
-                  card1Value: playerCards.card1Value,
-                  card2Value: playerCards.card2Value,
-                  isDecrypted: playerCards.isDecrypted,
-                  isDecrypting: playerCards.isDecrypting,
+          {/* Dealer Avatar - Left of Table */}
+          <div className="order-3 lg:order-2 hidden lg:block">
+            <div className="sticky top-4">
+              <DealerAvatar gameId={gameId} size="xl" showGreeting={false} />
+            </div>
+          </div>
+
+          {/* Main Poker Table */}
+          <div className="order-1 lg:order-3">
+            <div
+              className="relative bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950 rounded-3xl shadow-2xl border-8 border-amber-900/30 overflow-hidden"
+              style={{ minHeight: "600px" }}
+            >
+              {/* Poker Table Felt Texture */}
+              <div
+                className="absolute inset-0 opacity-10"
+                style={{
+                  backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+                  backgroundSize: "40px 40px",
                 }}
-              />
+              ></div>
 
-              {/* Card decryption status */}
-              {phase >= 1 && phase < 4 && (
-                <div className="mt-4 text-center">
-                  {playerCards.isDecrypting && (
-                    <div className="flex justify-center items-center gap-2">
-                      <span className="loading loading-spinner loading-xs"></span>
-                      <p className="text-sm">Decrypting your cards...</p>
-                    </div>
-                  )}
-                  {playerCards.decryptError && <p className="text-error text-xs">{playerCards.decryptError}</p>}
-                  {!playerCards.card1Handle && <p className="text-sm opacity-70">Waiting for cards to be dealt...</p>}
-                  {playerCards.card1Handle && !playerCards.isDecrypted && !playerCards.isDecrypting && (
-                    <p className="text-warning text-xs">⚠️ Cards encrypted. Auto-decrypting...</p>
-                  )}
-                </div>
-              )}
+              <div className="relative p-8">
+                <PokerTable
+                  players={players}
+                  communityCards={communityCards}
+                  pot={pot}
+                  phase={phase}
+                  yourCards={{
+                    card1Value: playerCards.card1Value,
+                    card2Value: playerCards.card2Value,
+                    isDecrypted: playerCards.isDecrypted,
+                    isDecrypting: playerCards.isDecrypting,
+                  }}
+                />
 
-              {phase === 0 && gameCreator && address?.toLowerCase() === gameCreator.toLowerCase() && (
-                <div className="mt-8 flex flex-col items-center gap-2">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleStartGame}
-                    disabled={isPending || isConfirming || playerCount < 2}
-                  >
-                    {isPending || isConfirming ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Starting...
-                      </>
-                    ) : (
-                      `Start Game (${playerCount}/6 players)`
+                {/* Card decryption status */}
+                {phase >= 1 && phase < 4 && (
+                  <div className="mt-4 text-center">
+                    {playerCards.isDecrypting && (
+                      <div className="flex justify-center items-center gap-2 text-white">
+                        <span className="loading loading-spinner loading-xs"></span>
+                        <p className="text-sm">Decrypting your cards...</p>
+                      </div>
                     )}
-                  </button>
-                  {playerCount < 2 && <p className="text-white text-sm">Need at least 2 players to start</p>}
-                </div>
-              )}
-
-              {phase === 0 && gameCreator && address?.toLowerCase() !== gameCreator.toLowerCase() && (
-                <div className="mt-8 flex justify-center">
-                  <p className="text-white text-sm opacity-70">Waiting for game creator to start...</p>
-                </div>
-              )}
-
-              {/* Action buttons with smart disable logic */}
-              {phase >= 1 && phase < 3 && (
-                <div className="mt-4 space-y-4">
-                  <div className="flex justify-center gap-2 flex-wrap">
-                    {/* Fold button */}
-                    <div className="tooltip" data-tip={availableActions.foldReason || "Give up this hand"}>
-                      <button
-                        className="btn btn-error btn-sm"
-                        onClick={() => handleAction(1)}
-                        disabled={!availableActions.canFold || isPending || isConfirming}
-                      >
-                        🚫 Fold
-                      </button>
-                    </div>
-
-                    {/* Check button */}
-                    <div className="tooltip" data-tip={availableActions.checkReason || "Pass without betting"}>
-                      <button
-                        className="btn btn-info btn-sm"
-                        onClick={() => handleAction(2)}
-                        disabled={!availableActions.canCheck || isPending || isConfirming}
-                      >
-                        ✋ Check
-                      </button>
-                    </div>
-
-                    {/* Call button */}
-                    <div className="tooltip" data-tip={availableActions.callReason || "Match the current bet"}>
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => handleAction(3)}
-                        disabled={!availableActions.canCall || isPending || isConfirming}
-                      >
-                        📞 Call
-                        {availableActions.canCall && currentPlayer && (
-                          <span className="ml-1">
-                            ({(BigInt(currentBet) - BigInt(currentPlayer.currentBet)).toString()})
-                          </span>
-                        )}
-                      </button>
-                    </div>
+                    {playerCards.decryptError && <p className="text-error text-xs">{playerCards.decryptError}</p>}
+                    {!playerCards.card1Handle && (
+                      <p className="text-sm text-slate-300">Waiting for cards to be dealt...</p>
+                    )}
+                    {playerCards.card1Handle && !playerCards.isDecrypted && !playerCards.isDecrypting && (
+                      <p className="text-warning text-xs">⚠️ Cards encrypted. Auto-decrypting...</p>
+                    )}
                   </div>
+                )}
 
-                  {/* Raise section */}
-                  <div className="flex justify-center items-center gap-2">
-                    <label className="text-sm font-semibold">Raise:</label>
-                    <input
-                      type="number"
-                      value={raiseAmount}
-                      onChange={e => setRaiseAmount(e.target.value)}
-                      className="input input-bordered input-sm w-24"
-                      placeholder="Amount"
-                      min="10"
-                      disabled={!availableActions.canRaise || isPending || isConfirming}
-                    />
-                    <div className="tooltip" data-tip={availableActions.raiseReason || "Increase the bet"}>
-                      <button
-                        className="btn btn-warning btn-sm"
-                        onClick={() => handleAction(4, parseInt(raiseAmount))}
-                        disabled={!availableActions.canRaise || isPending || isConfirming}
-                      >
-                        📈 Raise
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Turn indicator */}
-                  {!currentPlayer?.isCurrentPlayer && (
-                    <p className="text-center text-sm opacity-70">⏳ Waiting for other players...</p>
-                  )}
-                  {currentPlayer?.isCurrentPlayer && (
-                    <p className="text-center text-sm font-bold text-accent animate-pulse">🎯 It&apos;s your turn!</p>
-                  )}
-                </div>
-              )}
-
-              {(isPending || isConfirming) && (
-                <div className="mt-4 text-center">
-                  <span className="loading loading-spinner loading-md text-white"></span>
-                  <p className="text-white text-sm mt-2">
-                    {isPending ? "Confirming transaction..." : "Waiting for confirmation..."}
-                  </p>
-                </div>
-              )}
-
-              {phase === 4 && (
-                <div className="mt-4 text-center space-y-3">
-                  <p className="text-white text-2xl font-bold">🎉 Game Finished!</p>
-                  {winner && winner !== "0x0000000000000000000000000000000000000000" && (
-                    <div className="bg-yellow-600 bg-opacity-30 rounded-lg p-4">
-                      <p className="text-yellow-200 text-sm font-semibold">🏆 Winner</p>
-                      <p className="text-white text-lg font-mono mt-1">
-                        {winner.slice(0, 6)}...{winner.slice(-4)}
-                      </p>
-                      {address?.toLowerCase() === winner.toLowerCase() && (
-                        <p className="text-yellow-300 text-sm mt-1 font-bold">🎊 Congratulations! You won!</p>
-                      )}
-                      <p className="text-yellow-200 text-sm mt-2">
-                        Winnings: <span className="font-bold text-white">{winnings.toString()} chips</span>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card bg-base-200 shadow-xl">
-            <div className="card-body">
-              <h4 className="font-bold mb-2">Players</h4>
-              {playerAddresses.length > 0 ? (
-                <div className="space-y-2">
-                  {playerAddresses.map((addr, index) => (
-                    <div
-                      key={addr}
-                      className={`flex justify-between items-center p-2 rounded ${
-                        index === currentPlayerIndex && phase >= 1 && phase < 4
-                          ? "bg-accent bg-opacity-20 border border-accent"
-                          : "bg-base-300"
-                      } ${playerFolded[index] ? "opacity-50" : ""}`}
+                {phase === 0 && gameCreator && address?.toLowerCase() === gameCreator.toLowerCase() && (
+                  <div className="mt-8 flex flex-col items-center gap-2">
+                    <button
+                      className="btn btn-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-0 shadow-lg"
+                      onClick={handleStartGame}
+                      disabled={isPending || isConfirming || playerCount < 2}
                     >
-                      <div className="flex items-center gap-2">
-                        {index === currentPlayerIndex && phase >= 1 && phase < 4 && (
-                          <span className="text-accent">👉</span>
-                        )}
-                        <span className="text-sm font-mono">
-                          {addr.slice(0, 6)}...{addr.slice(-4)}
-                        </span>
-                        {addr.toLowerCase() === address?.toLowerCase() && (
-                          <span className="badge badge-primary badge-sm">You</span>
-                        )}
-                        {playerFolded[index] && <span className="badge badge-error badge-sm">Folded</span>}
+                      {isPending || isConfirming ? (
+                        <>
+                          <span className="loading loading-spinner loading-sm"></span>
+                          Starting...
+                        </>
+                      ) : (
+                        `🎮 Start Game (${playerCount}/6 players)`
+                      )}
+                    </button>
+                    {playerCount < 2 && <p className="text-amber-300 text-sm">⚠️ Need at least 2 players to start</p>}
+                  </div>
+                )}
+
+                {phase === 0 && gameCreator && address?.toLowerCase() !== gameCreator.toLowerCase() && (
+                  <div className="mt-8 flex justify-center">
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <span className="loading loading-dots loading-sm"></span>
+                      <p className="text-sm">Waiting for game creator to start...</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action buttons with smart disable logic */}
+                {phase >= 1 && phase < 3 && (
+                  <div className="mt-8 space-y-4">
+                    <div className="flex justify-center gap-3 flex-wrap">
+                      {/* Fold button */}
+                      <div className="tooltip" data-tip={availableActions.foldReason || "Give up this hand"}>
+                        <button
+                          className="btn btn-lg bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg min-w-[120px]"
+                          onClick={() => handleAction(1)}
+                          disabled={!availableActions.canFold || isPending || isConfirming}
+                        >
+                          🚫 Fold
+                        </button>
                       </div>
-                      <div className="text-right text-sm">
-                        <div>💰 {playerChips[index]?.toString() || "0"} chips</div>
-                        {playerBets[index] && Number(playerBets[index]) > 0 && (
-                          <div className="text-warning">Bet: {playerBets[index].toString()}</div>
-                        )}
+
+                      {/* Check button */}
+                      <div className="tooltip" data-tip={availableActions.checkReason || "Pass without betting"}>
+                        <button
+                          className="btn btn-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 shadow-lg min-w-[120px]"
+                          onClick={() => handleAction(2)}
+                          disabled={!availableActions.canCheck || isPending || isConfirming}
+                        >
+                          ✋ Check
+                        </button>
+                      </div>
+
+                      {/* Call button */}
+                      <div className="tooltip" data-tip={availableActions.callReason || "Match the current bet"}>
+                        <button
+                          className="btn btn-lg bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white border-0 shadow-lg min-w-[120px]"
+                          onClick={() => handleAction(3)}
+                          disabled={!availableActions.canCall || isPending || isConfirming}
+                        >
+                          📞 Call
+                          {availableActions.canCall && currentPlayer && (
+                            <span className="ml-1 text-xs">
+                              ({(BigInt(currentBet) - BigInt(currentPlayer.currentBet)).toString()})
+                            </span>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm opacity-70">No players yet</p>
-              )}
+
+                    {/* Raise section */}
+                    <div className="flex justify-center items-center gap-3 bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+                      <label className="text-sm font-semibold text-white">Raise Amount:</label>
+                      <input
+                        type="number"
+                        value={raiseAmount}
+                        onChange={e => setRaiseAmount(e.target.value)}
+                        className="input input-bordered bg-slate-700/50 text-white border-slate-600 w-32"
+                        placeholder="Amount"
+                        min="10"
+                        disabled={!availableActions.canRaise || isPending || isConfirming}
+                      />
+                      <div className="tooltip" data-tip={availableActions.raiseReason || "Increase the bet"}>
+                        <button
+                          className="btn btn-lg bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white border-0 shadow-lg min-w-[120px]"
+                          onClick={() => handleAction(4, parseInt(raiseAmount))}
+                          disabled={!availableActions.canRaise || isPending || isConfirming}
+                        >
+                          📈 Raise
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Turn indicator */}
+                    {!currentPlayer?.isCurrentPlayer && (
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 text-slate-300">
+                          <span className="loading loading-dots loading-sm"></span>
+                          <p className="text-sm">Waiting for other players...</p>
+                        </div>
+                      </div>
+                    )}
+                    {currentPlayer?.isCurrentPlayer && (
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-emerald-400 animate-pulse">🎯 It&apos;s your turn!</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(isPending || isConfirming) && (
+                  <div className="mt-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="loading loading-spinner loading-md text-emerald-400"></span>
+                      <p className="text-white text-sm">
+                        {isPending ? "Confirming transaction..." : "Waiting for confirmation..."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {phase === 4 && (
+                  <div className="mt-8 text-center space-y-4">
+                    <p className="text-white text-3xl font-bold">🎉 Game Finished!</p>
+                    {winner && winner !== "0x0000000000000000000000000000000000000000" && (
+                      <div className="bg-gradient-to-r from-amber-600/30 to-yellow-600/30 backdrop-blur-sm rounded-2xl p-6 border-2 border-amber-500/50 shadow-2xl">
+                        <p className="text-amber-300 text-sm font-semibold uppercase tracking-wider">🏆 Winner</p>
+                        <p className="text-white text-2xl font-mono mt-2">
+                          {winner.slice(0, 6)}...{winner.slice(-4)}
+                        </p>
+                        {address?.toLowerCase() === winner.toLowerCase() && (
+                          <p className="text-amber-200 text-lg mt-2 font-bold animate-bounce">
+                            🎊 Congratulations! You won!
+                          </p>
+                        )}
+                        <p className="text-amber-100 text-base mt-3">
+                          Winnings: <span className="font-bold text-white text-xl">{winnings.toString()} chips</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

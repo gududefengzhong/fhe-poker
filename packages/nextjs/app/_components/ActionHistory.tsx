@@ -2,7 +2,7 @@
 
 import { useAccount } from "wagmi";
 import { useDeployedContractInfo } from "~~/hooks/helper";
-import { useGamePolling, type ActionItem } from "~~/hooks/useGamePolling";
+import { type ActionItem, useGamePolling } from "~~/hooks/useGamePolling";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
 
 interface ActionHistoryProps {
@@ -51,32 +51,33 @@ export function ActionHistory({ gameId }: ActionHistoryProps) {
   };
 
   return (
-    <div className="card bg-base-200 shadow-lg">
-      <div className="card-body p-4">
-        <h4 className="font-bold text-sm flex items-center gap-2">
+    <div className="h-full">
+      <div className="p-4">
+        <h4 className="font-bold text-sm flex items-center gap-2 text-white mb-3">
           <span>📜</span>
           <span>Action History</span>
-          {isLoading && <span className="loading loading-spinner loading-xs"></span>}
+          {isLoading && <span className="loading loading-spinner loading-xs text-emerald-400"></span>}
         </h4>
-        {lastUpdate > 0 && <p className="text-[10px] text-base-content/50">Updated {formatLastUpdate()}</p>}
-        <div className="divider my-1"></div>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        {lastUpdate > 0 && <p className="text-[10px] text-slate-400 mb-2">Updated {formatLastUpdate()}</p>}
+        <div className="h-px bg-slate-700/50 mb-3"></div>
+        <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
           {actions.length === 0 ? (
-            <p className="text-xs text-base-content/50 text-center py-4">
-              {isLoading ? "Loading..." : "No actions yet"}
-            </p>
+            <p className="text-xs text-slate-400 text-center py-8">{isLoading ? "Loading..." : "No actions yet"}</p>
           ) : (
             actions
               .slice()
               .reverse()
               .map((action: ActionItem) => (
-                <div key={action.id} className="flex items-start gap-2 text-xs">
+                <div
+                  key={action.id}
+                  className="flex items-start gap-2 text-xs bg-slate-700/30 rounded-lg p-2 hover:bg-slate-700/50 transition-colors"
+                >
                   <span className="text-lg">{action.icon}</span>
                   <div className="flex-1">
                     <p className={`${action.color} font-medium`}>
                       {shortenAddress(action.player)} {action.action}
                     </p>
-                    <p className="text-base-content/50 text-[10px]">{formatTime(action.timestamp)}</p>
+                    <p className="text-slate-400 text-[10px]">{formatTime(action.timestamp)}</p>
                   </div>
                 </div>
               ))
