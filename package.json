@@ -1,0 +1,39 @@
+{
+  "name": "fhe-poker",
+  "version": "1.0.0",
+  "description": "FHE Texas Hold'em Poker - Privacy-preserving on-chain poker game",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "chain": "pnpm --filter hardhat chain",
+    "compile": "pnpm --filter hardhat compile",
+    "deploy": "pnpm --filter hardhat deploy",
+    "deploy:sepolia": "pnpm --filter hardhat deploy:sepolia",
+    "test": "pnpm --filter hardhat test",
+    "dev": "pnpm --filter nextjs dev",
+    "build": "pnpm --filter nextjs build",
+    "build:production": "bash scripts/build-production.sh",
+    "build:deploy": "bash scripts/build-and-deploy.sh",
+    "start": "pnpm --filter nextjs start",
+    "generate": "pnpm --filter nextjs generate",
+    "vercel-build": "pnpm install && pnpm --filter hardhat compile && pnpm --filter nextjs build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "keywords": [
+    "fhe",
+    "fhevm",
+    "zama",
+    "poker",
+    "texas-holdem",
+    "blockchain",
+    "privacy"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
