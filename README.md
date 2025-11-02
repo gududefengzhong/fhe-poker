@@ -264,9 +264,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support & Contact
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/fhe-poker/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/fhe-poker/discussions)
-- **Twitter**: [@yourhandle](https://twitter.com/yourhandle)
+- **Issues**: [GitHub Issues](https://github.com/gududefengzhong/fhe-poker/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/gududefengzhong)
+- **Twitter**: [@yourhandle](https://x.com/rochestor_mu)
 
 ## 🚧 Roadmap
 
